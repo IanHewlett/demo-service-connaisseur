@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: connaisseur-release-values
+  namespace: connaisseur
+data:
+  values.yaml: |
+    connaisseur:
+      kubernetes:
+        deployment:
+          nodeSelector:
+            nodegroup: "${MANAGEMENT_NODE_GROUP_NAME}"
+          tolerations:
+            - key: "dedicated"
+              operator: "Equal"
+              value: "${MANAGEMENT_NODE_GROUP_ROLE}"
+              effect: "NoSchedule"
+          affinity: null
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1024Mi
+            requests:
+              cpu: 100m
+              memory: 512Mi
+      application:
+        features:
+          namespacedValidation:
+            mode: validate
+        policy:
+          - pattern: '*:*'
+            validator: deny
+          - pattern: ghcr.io/ianhewlett/*:*
+            validator: cosign
+            with:
+              threshold: 1
+              trustRoot: '*'
+          - pattern: docker.io/istio/proxyv2:*
+            validator: allow
+          - pattern: registry.k8s.io/*:*
+            validator: allow
+          - pattern: k8s.gcr.io/*:*
+            validator: allow
+          - pattern: registry.k8s.io/*:*
+            validator: allow
+          - pattern: hashicorp/vault:*
+            validator: allow
+          - pattern: docker.io/openpolicyagent/opa:*
+            validator: allow
+          - pattern: gcr.io/kubebuilder/kube-rbac-proxy:*
+            validator: allow
+          - pattern: ghcr.io/fluxcd/*:*
+            validator: allow
+        validators:
+          - approve: true
+            name: allow
+            type: static
+          - approve: false
+            name: deny
+            type: static
+          - name: cosign
+            type: cosign
+            auth:
+              secretName: registry-credential
+            trustRoots:
+              - name: default
+                key: pub_key

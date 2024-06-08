@@ -1,0 +1,11 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: connaisseur
+  namespace: connaisseur
+spec:
+  type: "oci"
+  interval: 1m0s
+  url: oci://ghcr.io/ianhewlett/charts
+  secretRef:
+    name: chart-pull-secret

@@ -1,0 +1,41 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: connaisseur
+  namespace: connaisseur
+spec:
+  releaseName: connaisseur
+  chart:
+    spec:
+      chart: connaisseur
+      version: 0.1.0
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: HelmRepository
+        name: connaisseur
+        namespace: connaisseur
+#      verify:
+#        provider: cosign
+#        secretRef:
+#          name: cosign-signing-key
+  interval: 1m0s
+  install:
+    remediation:
+      retries: 3
+  valuesFrom:
+    - kind: ConfigMap
+      name: connaisseur-release-values
+      valuesKey: values.yaml
+    - kind: Secret
+      name: cluster-metadata
+      valuesKey: management_node_group_name
+      targetPath: connaisseur.kubernetes.deployment.nodeSelector.nodegroup
+    - kind: Secret
+      name: cluster-metadata
+      valuesKey: management_node_group_role
+      targetPath: connaisseur.kubernetes.deployment.tolerations[0].value
+    - kind: Secret
+      name: cosign-signing-key
+      valuesKey: key1.pub
+      targetPath: connaisseur.application.validators[2].trustRoots[0].key

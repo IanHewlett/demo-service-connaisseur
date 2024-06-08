@@ -1,0 +1,12 @@
+name: connaisseur
+title: InSpec Profile for Core Service connaisseur
+license: MIT
+version: 0.1.3
+inspec_version: '~> 6'
+inputs:
+  - name: management_node_group_name
+    description: management_node_group_name
+    type: String
+  - name: management_node_group_role
+    description: management_node_group_role
+    type: String
